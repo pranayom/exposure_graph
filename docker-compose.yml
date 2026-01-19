@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  neo4j:
+    image: neo4j:5-community
+    container_name: exposuregraph-neo4j
+    ports:
+      - "7474:7474"  # HTTP browser interface
+      - "7687:7687"  # Bolt protocol for driver connections
+    environment:
+      - NEO4J_AUTH=none  # Disable auth for local development
+      - NEO4J_PLUGINS=["apoc"]  # APOC library for advanced procedures
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  neo4j_data:
+  neo4j_logs:

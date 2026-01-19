@@ -1,0 +1,25 @@
+# ExposureGraph Dependencies
+
+# Graph Database
+neo4j>=5.0.0
+
+# Data Validation & Settings
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# CLI Interface
+typer>=0.9.0
+rich>=13.0.0
+
+# HTTP Client
+httpx>=0.25.0
+
+# LLM Integration
+ollama>=0.1.0
+
+# UI (for later days)
+streamlit>=1.28.0
+plotly>=5.18.0
+
+# Development
+python-dotenv>=1.0.0
