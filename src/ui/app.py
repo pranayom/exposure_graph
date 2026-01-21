@@ -17,6 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.graph.client import Neo4jClient
 from src.graph.models import WebService
+from src.ai.graph_agent import GraphQueryAgent
+from src.ai.llm_client import LLMClient, LLMConnectionError
 
 # =============================================================================
 # Page Configuration
@@ -93,6 +95,32 @@ st.markdown(
     /* Table styling */
     .dataframe {
         font-size: 0.9rem;
+    }
+
+    /* Chat message styling */
+    .chat-message {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        max-width: 85%;
+    }
+    .chat-message.user {
+        background-color: #1f77b4;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+    .chat-message.assistant {
+        background-color: #f0f2f6;
+        color: #1f1f1f;
+        margin-right: auto;
+    }
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+    }
+    .suggested-question {
+        margin: 0.25rem;
     }
     </style>
     """,
@@ -193,7 +221,7 @@ st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Navigation",
-    ["Dashboard", "Assets"],
+    ["Dashboard", "Assets", "Chat"],
     label_visibility="collapsed",
 )
 
