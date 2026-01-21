@@ -1,6 +1,8 @@
 # ExposureGraph
 
-**Transform security reconnaissance data into prioritized, explainable insights using a Knowledge Graph and local LLM.**
+This was one cool project that I have been trying to implement for sometime. 
+
+Can we transform security reconnaissance data into prioritized, explainable insights using a Knowledge Graph and local LLM? Yes we can!
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -186,22 +188,6 @@ streamlit run src/ui/app.py
 
 ---
 
-## Screenshots
-
-### Dashboard Overview
-![Dashboard](docs/screenshots/dashboard.png)
-*Executive view with metrics, risk distribution, and technology inventory*
-
-### Asset Details
-![Assets](docs/screenshots/assets.png)
-*Searchable asset list with expandable risk factor breakdowns*
-
-### Chat Interface
-![Chat](docs/screenshots/chat.png)
-*Natural language queries with generated Cypher and summaries*
-
----
-
 ## CLI Usage
 
 ### Run a Scan (Authorized Targets Only)
@@ -298,13 +284,10 @@ exposure-graph/
 │   ├── ai/                # LLM client and query agent
 │   └── ui/                # Streamlit application
 │
-├── scripts/
-│   ├── run_scan.py        # CLI for scanning
-│   ├── query.py           # CLI for natural language queries
-│   └── seed_demo.py       # Demo data generator
-│
-└── docs/
-    └── screenshots/       # UI screenshots
+└── scripts/
+    ├── run_scan.py        # CLI for scanning
+    ├── query.py           # CLI for natural language queries
+    └── seed_demo.py       # Demo data generator
 ```
 
 ---
