@@ -572,6 +572,163 @@ def render_assets():
 
 
 # =============================================================================
+# Chat Page
+# =============================================================================
+
+# Suggested questions for the chat interface
+SUGGESTED_QUESTIONS = [
+    "What are our riskiest assets?",
+    "Show me staging servers",
+    "How many subdomains do we have?",
+    "What services are running nginx?",
+    "List all domains",
+    "Show high risk services above 70",
+]
+
+
+@st.cache_resource
+def get_graph_agent() -> GraphQueryAgent:
+    """Get cached GraphQueryAgent with LLM client."""
+    try:
+        llm_client = LLMClient()
+        llm_client.check_connection()
+    except LLMConnectionError:
+        # Fall back to mock mode if Ollama isn't available
+        llm_client = LLMClient(mock=True)
+    return GraphQueryAgent(llm_client=llm_client)
+
+
+def render_chat():
+    """Render the chat interface page."""
+    st.title("💬 Chat with Your Data")
+    st.markdown("Ask questions about your security assets in natural language.")
+
+    # Initialize session state for chat history
+    if "chat_messages" not in st.session_state:
+        st.session_state.chat_messages = []
+
+    # Check Neo4j connection
+    try:
+        client = get_neo4j_client()
+        stats = client.get_stats()
+        if stats["webservices"] == 0:
+            st.warning(
+                "⚠️ No data in the graph. Run a scan first: "
+                "`python scripts/run_scan.py scan scanme.sh` or seed demo data: "
+                "`python scripts/seed_demo.py`"
+            )
+    except Exception as e:
+        st.error(f"❌ Failed to connect to Neo4j: {e}")
+        st.info("Make sure Neo4j is running: `docker-compose up -d`")
+        return
+
+    # Suggested questions section
+    st.markdown("### 💡 Suggested Questions")
+    cols = st.columns(3)
+    for i, question in enumerate(SUGGESTED_QUESTIONS):
+        col_idx = i % 3
+        with cols[col_idx]:
+            if st.button(question, key=f"suggested_{i}", use_container_width=True):
+                st.session_state.pending_question = question
+                st.rerun()
+
+    st.markdown("---")
+
+    # Display chat history
+    st.markdown("### 📜 Conversation")
+
+    chat_container = st.container()
+
+    with chat_container:
+        if not st.session_state.chat_messages:
+            st.info("Start a conversation by asking a question below or clicking a suggested question above.")
+        else:
+            for msg in st.session_state.chat_messages:
+                if msg["role"] == "user":
+                    st.markdown(
+                        f'<div class="chat-container">'
+                        f'<div class="chat-message user">🧑 {msg["content"]}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        f'<div class="chat-container">'
+                        f'<div class="chat-message assistant">🤖 {msg["content"]}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    # Show Cypher query in expander if available
+                    if "cypher" in msg and msg["cypher"]:
+                        with st.expander("🔍 View Generated Cypher"):
+                            st.code(msg["cypher"], language="cypher")
+                    # Show raw results in expander if available
+                    if "raw_results" in msg and msg["raw_results"]:
+                        with st.expander(f"📊 View Raw Results ({len(msg['raw_results'])} rows)"):
+                            st.json(msg["raw_results"][:10])  # Limit to 10 for display
+
+    st.markdown("---")
+
+    # Input area
+    col1, col2 = st.columns([5, 1])
+
+    with col1:
+        user_input = st.text_input(
+            "Your question",
+            placeholder="Ask about your security data...",
+            key="chat_input",
+            label_visibility="collapsed",
+        )
+
+    with col2:
+        send_clicked = st.button("Send", type="primary", use_container_width=True)
+
+    # Handle pending question from suggested buttons
+    if "pending_question" in st.session_state:
+        user_input = st.session_state.pending_question
+        del st.session_state.pending_question
+        send_clicked = True
+
+    # Process the question
+    if send_clicked and user_input:
+        # Add user message to history
+        st.session_state.chat_messages.append({
+            "role": "user",
+            "content": user_input,
+        })
+
+        # Get response from agent
+        with st.spinner("🔄 Analyzing your question..."):
+            try:
+                agent = get_graph_agent()
+                result = agent.query(user_input)
+
+                # Add assistant response to history
+                st.session_state.chat_messages.append({
+                    "role": "assistant",
+                    "content": result.summary,
+                    "cypher": result.cypher,
+                    "raw_results": result.raw_results,
+                })
+            except Exception as e:
+                st.session_state.chat_messages.append({
+                    "role": "assistant",
+                    "content": f"Sorry, I encountered an error: {str(e)}",
+                    "cypher": "",
+                    "raw_results": [],
+                })
+
+        # Rerun to display new messages
+        st.rerun()
+
+    # Clear chat button
+    st.markdown("---")
+    if st.button("🗑️ Clear Conversation", type="secondary"):
+        st.session_state.chat_messages = []
+        st.rerun()
+
+
+# =============================================================================
 # Main Router
 # =============================================================================
 
@@ -579,3 +736,5 @@ if page == "Dashboard":
     render_dashboard()
 elif page == "Assets":
     render_assets()
+elif page == "Chat":
+    render_chat()

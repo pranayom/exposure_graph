@@ -19,6 +19,29 @@ services:
       timeout: 5s
       retries: 5
 
+  # Demo data seeder - only runs with: docker-compose --profile demo up
+  seed-demo:
+    image: python:3.11-slim
+    container_name: exposuregraph-seed
+    profiles:
+      - demo
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+    command: >
+      bash -c "
+        pip install -q neo4j typer rich pydantic pydantic-settings &&
+        echo 'Waiting for Neo4j to be fully ready...' &&
+        sleep 5 &&
+        python scripts/seed_demo.py seed --clear &&
+        echo 'Demo data seeded! You can now run: streamlit run src/ui/app.py'
+      "
+
 volumes:
   neo4j_data:
   neo4j_logs:
