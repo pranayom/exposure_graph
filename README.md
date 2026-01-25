@@ -297,7 +297,7 @@ exposure-graph/
 ### Running Tests
 
 ```bash
-# Manual testing workflow (see TUTORIALS.md for details)
+# Manual testing workflow 
 docker-compose up -d
 python scripts/seed_demo.py
 streamlit run src/ui/app.py
