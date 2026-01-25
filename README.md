@@ -12,7 +12,7 @@ Can we transform security reconnaissance data into prioritized, explainable insi
 
 ## Overview
 
-ExposureGraph is an open-source exposure management platform that:
+ExposureGraph is an open-source exposure management tool/project that:
 
 1. **Discovers** your attack surface using reconnaissance tools (subfinder, httpx)
 2. **Stores** asset relationships in a Neo4j Knowledge Graph
