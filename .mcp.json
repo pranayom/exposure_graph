@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "exposuregraph": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["src/mcp/server.py"],
+      "env": {
+        "NEO4J_URI": "bolt://localhost:7687",
+        "MOCK_LLM": "false"
+      }
+    }
+  }
+}
