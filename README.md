@@ -146,6 +146,7 @@ flowchart TB
 | Charts | Plotly | Interactive visualizations |
 | CLI | Typer + Rich | Command-line interface |
 | Recon | subfinder, httpx | Asset discovery |
+| MCP | mcp[cli] (FastMCP) | AI agent integration |
 | Containers | Docker Compose | Infrastructure |
 
 ---
@@ -234,6 +235,59 @@ python scripts/query.py examples
 
 ---
 
+## MCP Server (AI Agent Integration)
+
+ExposureGraph includes an MCP (Model Context Protocol) server that lets AI agents like Claude Code query the knowledge graph, calculate risk scores, and generate reports directly.
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `get_risk_overview` | Dashboard-level stats and risk distribution |
+| `get_risky_assets` | Top N riskiest services with filters |
+| `get_assets_for_domain` | Subdomains and services for a domain |
+| `calculate_risk_score` | What-if risk scoring for any URL |
+| `run_cypher_query` | Read-only Cypher queries (write ops blocked) |
+| `query_graph` | Natural language questions (requires Ollama) |
+| `generate_risk_report` | Executive or technical risk reports |
+
+### Available Resources
+
+| URI | Description |
+|-----|-------------|
+| `exposuregraph://schema` | Neo4j node/relationship schema |
+| `exposuregraph://scoring-model` | Risk scoring model documentation |
+
+### Setup
+
+The project includes `.mcp.json` for automatic Claude Code integration. After cloning:
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Start Neo4j: `docker-compose up -d`
+3. Seed demo data: `python scripts/seed_demo.py seed --clear`
+4. Restart Claude Code — the MCP server is auto-discovered
+
+### Testing with MCP Inspector
+
+```bash
+mcp dev src/mcp/server.py
+```
+
+This opens a browser UI where you can invoke each tool interactively.
+
+### Example Conversations in Claude Code
+
+Once connected, ask questions naturally:
+
+- "What is the current risk overview of our attack surface?"
+- "Show me assets with risk scores above 70"
+- "What subdomains does acme-corp.com have?"
+- "Calculate the risk for http://staging.example.com with status 200 and nginx/1.0.5"
+- "Generate an executive risk report"
+- "Run a Cypher query to find all services running nginx"
+
+---
+
 ## Configuration
 
 Environment variables (or `.env` file):
@@ -292,6 +346,7 @@ exposure-graph/
 ├── README.md              # This file
 ├── DISCLAIMER.md          # Legal disclaimer
 ├── LICENSE                # MIT License
+├── .mcp.json              # MCP server config for Claude Code
 ├── docker-compose.yml     # Neo4j + demo seeder
 ├── requirements.txt       # Python dependencies
 ├── config.py              # Pydantic settings
@@ -301,6 +356,7 @@ exposure-graph/
 │   ├── graph/             # Neo4j client and models
 │   ├── scoring/           # Risk calculator
 │   ├── ai/                # LLM client and query agent
+│   ├── mcp/               # MCP server for AI agent access
 │   └── ui/                # Streamlit application
 │
 └── scripts/
@@ -367,6 +423,8 @@ Contributions are welcome! Please:
 | "httpx wrong version" | Ensure Go httpx is in PATH before Python httpx |
 | "LLM responses are slow" | Use smaller model (`llama3.2:3b`) or enable mock mode |
 | "Streamlit won't start" | Run `pip install --upgrade streamlit` |
+| MCP server not connecting | Restart Claude Code, run `/mcp` to check status |
+| MCP tools return errors | Ensure Neo4j is running and seeded with demo data |
 
 ---
 
