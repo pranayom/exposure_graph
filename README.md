@@ -19,6 +19,7 @@ ExposureGraph is an open-source exposure management tool/project that:
 3. **Calculates** explainable risk scores with transparent factors
 4. **Enables** natural language queries via local LLM (Ollama)
 5. **Visualizes** your security posture through an interactive Streamlit dashboard
+6. **Integrates** with AI agents via MCP (Model Context Protocol) server
 
 ### Why ExposureGraph?
 
@@ -30,6 +31,7 @@ Security teams drown in scanner output but lack **context**. A vulnerability on 
 | Risk scores are black boxes | Every score has explainable factors |
 | Queries require Cypher/SQL knowledge | Ask questions in natural language |
 | Data stays in spreadsheets | Interactive dashboard with drill-down |
+| AI assistants can't access your data | MCP server exposes tools natively |
 
 ---
 
@@ -57,6 +59,11 @@ flowchart TB
         CHAT[Chat Interface]
     end
 
+    subgraph Agentic["AI Agent Integration"]
+        MCP[MCP Server]
+        CC[Claude Code / MCP Client]
+    end
+
     SF -->|subdomains| NEO
     HX -->|services| NEO
     NEO --> SCORE
@@ -65,10 +72,14 @@ flowchart TB
     LLM --> CHAT
     NEO --> DASH
     NEO --> CLI
+    NEO <--> MCP
+    MCP <-->|stdio| CC
 
     style NEO fill:#4CAF50,color:#fff
     style LLM fill:#2196F3,color:#fff
     style DASH fill:#9C27B0,color:#fff
+    style MCP fill:#FF9800,color:#fff
+    style CC fill:#FF9800,color:#fff
 ```
 
 ### Data Flow
@@ -80,10 +91,17 @@ flowchart TB
 │             │     │    Graph    │     │  + Chat     │
 └─────────────┘     └──────┬──────┘     └─────────────┘
                            │
-                    ┌──────▼──────┐
-                    │   Ollama    │
-                    │  Llama 3.1  │
-                    └─────────────┘
+                ┌──────────┼──────────┐
+                │          │          │
+         ┌──────▼──────┐   │   ┌──────▼──────┐
+         │   Ollama    │   │   │   MCP       │
+         │  Llama 3.1  │   │   │   Server    │
+         └─────────────┘   │   └──────┬──────┘
+                           │          │
+                           │   ┌──────▼──────┐
+                           │   │ Claude Code │
+                           │   │ / MCP Client│
+                           │   └─────────────┘
 ```
 
 ### Graph Schema
@@ -113,6 +131,7 @@ flowchart TB
 - [x] **Interactive Dashboard** - Metrics, charts, filterable asset list
 - [x] **Chat Interface** - Conversational queries with suggested questions
 - [x] **Demo Mode** - Realistic seed data for demonstrations
+- [x] **MCP Server** - 7 tools + 2 resources for AI agent integration (Claude Code, etc.)
 
 ---
 
